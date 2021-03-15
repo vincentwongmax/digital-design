@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <button onclick="window.location.href='Karnaugh-Veitch-Map.html'">Karnaugh-Veitch-Map.html</button>
+    <br>
+    <input id="originNumber" placeholder="原本的數字">
+    <input id="originBase" placeholder="原本的基底">
+    <input id="Changebasec" placeholder="要轉換的基底">
+    <button type="button" onclick="keyin()">提交</button>
+
+    <br>
+    <br>
+    <select id="addsub1">
+        <option value="+">+</option>
+        <option value="-">-</option>
+    </select>
+
+    <input id="addsubinput1" placeholder="第一個數字">
+
+    <select id="addsub2">
+        <option value="+">+</option>
+        <option value="-">-</option>
+    </select>
+
+    <input id="addsubinput2" placeholder="第二個數字">
+
+    <select id="addsub3">
+        <option value="1">1補數</option>
+        <option value="2">2補數</option>
+        <option value="9">9補數</option>
+        <option value="10">10補數</option>
+        <option value="BCD">BCD</option>
+    </select>
+    <button type="button" onclick="MNaddsubCompliment_And_BCD()">提交</button>
+
+    <br>
+    <br>
+    <input placeholder="(偵錯碼)請輸入二進制的數字(偵錯碼)" id="paritybiteveninput"></input>
+
+    <select id="paritybiteven">
+        <option value="odd">odd(奇)</option>
+        <option value="even">even(偶)</option>
+
+    </select>
+    <button onclick="paritybit()" type="submit" class="btn btn-primary">提交</button>
+    <br>
+    <input placeholder="(ANDOR運算)請輸入二進制的數字" id="andorinput1"></input>
+    <input placeholder="(ANDOR運算)請輸入二進制的數字" id="andorinput2"></input>
+
+    <select id="andor">
+        <option value="and">and</option>
+        <option value="or">or</option>
+
+    </select>
+    <button onclick="andor()" type="submit" class="btn btn-primary">提交</button>
+
+
+
+
+
+
+    <h4 id="ANS"></h4>
+
+    <script>
+        //   TenToAny('0.513','2');
+        //   anyto10('6432.1','5');
+
+        //   AnytoAnyBitSystem('11111','2','2');
+        //A_sub_B_Compliment_10bit('72532', '3250') //10補數
+        //A_sub_B_Compliment_2bit('72532', '3250')//2補數
+        //A_sub_B_Compliment_1bit('1010100', '1000011')//1補數
+        //A_sub_B_Compliment_9bit('72532', '3250') //9補數
+
+        //asciicode();
+
+        changejs();
+        //BCD(2122232212, 576, '+', '+')
+
+        function MNaddsubCompliment_And_BCD() {
+            let addsub1 = document.getElementById("addsub1").value;
+            let addsub2 = document.getElementById("addsub2").value;
+            let addsubinput1 = document.getElementById("addsubinput1").value;
+            let addsubinput2 = document.getElementById("addsubinput2").value;
+
+            let whatisfunction = document.getElementById("addsub3").value;
+            if (whatisfunction == 1) {
+                for (let i = 0; i < addsubinput1.length; i++) {
+                    if (addsubinput1[i] >= 2) {
+                        alert('輸入錯誤 2 進制只能1和 0 ')
+                        return
+                    }
+                }
+
+                for (let i = 0; i < addsubinput2.length; i++) {
+                    if (addsubinput2[i] >= 2) {
+                        alert('輸入錯誤 2 進制只能1和 0 ')
+                        return
+                    }
+                }
+
+                A_sub_B_Compliment_1bit(addsubinput1, addsubinput2, addsub1, addsub2)
+            } else if (whatisfunction == 2) {
+                for (let i = 0; i < addsubinput1.length; i++) {
+                    if (addsubinput1[i] >= 2) {
+                        alert('輸入錯誤 2 進制只能1和 0 ')
+                        return
+                    }
+                }
+
+                for (let i = 0; i < addsubinput2.length; i++) {
+                    if (addsubinput2[i] >= 2) {
+                        alert('輸入錯誤 2 進制只能1和 0 ')
+                        return
+                    }
+                }
+                A_sub_B_Compliment_2bit(addsubinput1, addsubinput2, addsub1, addsub2)
+            } else if (whatisfunction == 9) {
+                A_sub_B_Compliment_9bit(addsubinput1, addsubinput2, addsub1, addsub2)
+            } else if (whatisfunction == 10) {
+                A_sub_B_Compliment_10bit(addsubinput1, addsubinput2, addsub1, addsub2)
+            } else if (whatisfunction == 'BCD') {
+                BCD(addsubinput1, addsubinput2, addsub1, addsub2)
+            }
+        }
+
+        function BCD(addsubinput1, addsubinput2, addsub1, addsub2) {
+
+            function padLeft(str, lengths) {
+                if (str.length >= lengths)
+                    return str;
+                else
+                    return padLeft("0" + str, lengths);
+            }
+            //10
+            let ShowAns = [];
+            let Ans = [];
+            let Step2 = '';
+            let Add1 = 0;
+            if (String(addsubinput1).length < String(addsubinput2).length) {
+                addsubinput1 = padLeft(addsubinput1, String(addsubinput2).length)
+            } else if (String(addsubinput1).length > String(addsubinput2).length) {
+                addsubinput2 = padLeft(addsubinput2, String(addsubinput1).length)
+            }
+
+            let readdsubinput1 = reversestring(String(addsubinput1));
+            let readdsubinput2 = reversestring(String(addsubinput2));
+
+            ShowAns.push("計算BCD碼" + addsubinput1 + "+" + addsubinput2);
+            ShowAns.push("1) 把每一位10進制碼單獨每個轉做二進制");
+            ShowAns.push("2) 把所有位數補零後對齊分別進行相加");
+            ShowAns.push("");
+
+            for (let i = 0; i < String(addsubinput1).length; i++) {
+                let a = padLeft(AnytoAnyBitSystem(String(readdsubinput1)[i], '10', '2'), 4)
+                ShowAns.push(a + " // " + String(readdsubinput1)[i]);
+                let b = padLeft(AnytoAnyBitSystem(String(readdsubinput2)[i], '10', '2'), 4)
+                ShowAns.push("+" + b + " // " + String(readdsubinput2)[i]);
+                if (Add1 == 1) {
+                    ShowAns.push("+" + Add1 + " 因前結果有進位需要加1");
+                }
+                ShowAns.push("--------");
+                Step1 = addBinary(a, b);
+                Step2 = addBinary(Step1, String(Add1));
+                ShowAns.push(Step2);
+                let Step3 = AnytoAnyBitSystem(String(Step2), '2', '10');
+
+                if (Number(Step3) >= 10) {
+                    Add1 = 1;
+                    let Step4 = addBinary(String(Step2), '0110')
+                    ShowAns.push("+" + "0110" + " 由於上述結果大於或等於10需要加0110");
+                    ShowAns.push("--------");
+                    ShowAns.push(Step4);
+                    if (Step4 > 4) {
+                        ShowAns.push("由於有溢位，去除前面的第一位數");
+                        var Step5 = Step4.substring(1, Step4.length)
+                        ShowAns.push(Step5);
+                    }
+                    ShowAns.push("<br>");
+                } else {
+                    var Step5 = Step2;
+                    Add1 = 0;
+                    ShowAns.push("<br>");
+                }
+                Ans.push(Step5);
+            }
+            ShowAns.push("Ans:" + Ans.reverse().splice(""));
+            document.getElementById('ANS').innerHTML = '';
+            for (let i = 0; i < ShowAns.length; i++) {
+                document.getElementById('ANS').innerHTML += ShowAns[i];
+                document.getElementById('ANS').innerHTML += '<br>';
+            }
+        }
+
+        function one_compliment(number) {
+            let Step0 = [];
+            let Step1 = '';
+            for (let i = 0; i < number.length; i++) {
+                if (Number(number[i]) == 0) {
+                    Step0.push(1);
+                } else {
+                    Step0.push(0);
+                }
+            }
+            Step1 = Step0.join('');
+            return String(Step1);
+            console.log(Step1)
+        }
+
+        function A_sub_B_Compliment_9bit(numbera, numberb, addsub1, addsub2) {
+            function xcompliment(number) {
+                let b = '';
+                for (let i = 0; i < number.length; i++) {
+                    b = b + '9';
+                }
+                let Ans = Number(b) - Number(number);
+                return Ans;
+            }
+
+            function xcompliment2(originnnumber, needchangenumebr) {
+                let Ans = [];
+                let b = '';
+                let Step0 = ''
+
+                if (String(originnnumber).length > String(needchangenumebr).length) {
+                    Step0 = originnnumber;
+                } else {
+                    Step0 = needchangenumebr;
+                }
+                for (let i = 0; i < Step0.length; i++) {
+                    b = b + '9';
+                }
+                Ans.push(Number(b) - Number(needchangenumebr));
+                Ans.push(b)
+                return Ans;
+            }
+
+            let ShowAns = [];
+
+            if (addsub1 == '+' && addsub2 == '-') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+                //沒有問題 GO
+            } else if (addsub1 == '-' && addsub2 == '+') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+                ShowAns.push("<br>")
+
+                //A B 兩個值換一下
+                var save = numbera;
+                numbera = numberb;
+                numberb = save;
+                ShowAns.push("因為符號是負號和正號 ，所以先把原本的兩個數字進行無條件互換")
+                ShowAns.push("新的M 為" + numbera)
+                ShowAns.push("新的N 為" + numberb)
+                ShowAns.push("=============")
+
+            } else if (addsub1 == '-' && addsub2 == '-') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+                ShowAns.push("<br>")
+                ShowAns.push("因為符號兩個數字都為負數 ")
+                ShowAns.push("第一步把原本的兩個數字的負號去除掉，之後相加")
+                ShowAns.push(numbera)
+                ShowAns.push("+" + numberb)
+                ShowAns.push("-----------")
+                ShowAns.push(Number(numbera) + Number(numberb))
+                ShowAns.push("把以上的結果加上負號 ")
+                ShowAns.push("=-" + `${Number(numbera) + Number(numberb)}`)
+
+                document.getElementById('ANS').innerHTML = '';
+                for (i = 0; i < ShowAns.length; i++) {
+                    document.getElementById('ANS').innerHTML += ShowAns[i];
+                    document.getElementById('ANS').innerHTML += "<br>";
+                }
+                return;
+
+            } else if (addsub1 == '+' && addsub2 == '+') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+                ShowAns.push("<br>")
+                ShowAns.push("因為符號兩個數字都為正數 ")
+                ShowAns.push("直接相加")
+                ShowAns.push(numbera)
+                ShowAns.push("+" + numberb)
+                ShowAns.push("-----------")
+                ShowAns.push(Number(numbera) + Number(numberb))
+                ShowAns.push("答案為" + `${Number(numbera) + Number(numberb)}`)
+
+                document.getElementById('ANS').innerHTML = '';
+                for (i = 0; i < ShowAns.length; i++) {
+                    document.getElementById('ANS').innerHTML += ShowAns[i];
+                    document.getElementById('ANS').innerHTML += "<br>";
+                }
+                return;
+            }
+
+            let Step00 = '0'
+
+            let Stepnumber = numbera;
+            if (String(numbera).length < String(numberb).length) {
+                for (let i = 0; i < String(numberb).length - String(numbera).length; i++) {
+                    Stepnumber = String(Step00) + String(Stepnumber)
+                }
+            }
+            //A
+            let Step0 = xcompliment2(numbera, numberb)
+            ShowAns.push("取得N 的9補數")
+            ShowAns.push(Step0[1])
+            ShowAns.push("-" + numberb)
+            ShowAns.push("---------")
+            ShowAns.push(Step0[0])
+            ShowAns.push("<br>")
+            let Step1 = Number(numbera) + Number(Step0[0]);
+            let Step2 = '';
+            ShowAns.push(Stepnumber);
+            ShowAns.push("+" + Step0[0]); //B
+            ShowAns.push("-------------"); //分割線
+
+            Step1_1 = String(Step1)
+            numbera_1 = String(numbera)
+            ShowAns.push(Step1); //A+B
+
+            if (Step1_1.length > Stepnumber.length) {
+                Step2 = Number(Step1_1.substring(1, Step0[0].length));
+                Step2 = Number(Step2) + 1;
+                ShowAns.push("因為有溢位，使用迴端進位--> 所以答案是: " + Step2);
+            } else {
+                Step2 = '-' + Number(xcompliment(String(Step1)));
+                ShowAns.push("因為沒有溢位，因此要去再做一次9補數，加上負號--> 所以答案是: " + Step2);
+            }
+            console.log(Step2);
+
+            document.getElementById('ANS').innerHTML = '';
+            for (i = 0; i < ShowAns.length; i++) {
+                document.getElementById('ANS').innerHTML += ShowAns[i];
+                document.getElementById('ANS').innerHTML += "<br>";
+            }
+        }
+
+        function A_sub_B_Compliment_1bit(numbera, numberb, addsub1, addsub2) {
+            let ShowAns = [];
+            if (addsub1 == '+' && addsub2 == '-') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+                //沒有問題 GO
+            } else if (addsub1 == '-' && addsub2 == '+') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+                //A B 兩個值換一下
+                let save = numbera;
+                numbera = numberb;
+                numberb = save;
+                ShowAns.push("因為符號是負號和正號 ，所以先把原本的兩個數字進行無條件互換")
+                ShowAns.push("新的M 為" + numbera)
+                ShowAns.push("新的N 為" + numberb)
+                ShowAns.push("=============")
+
+            } else if (addsub1 == '-' && addsub2 == '-') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+                ShowAns.push("<br>")
+                ShowAns.push("因為符號兩個數字都為負數 ")
+                ShowAns.push("第一步把原本的兩個數字的負號去除掉，之後相加")
+                ShowAns.push(numbera)
+                ShowAns.push("+" + numberb)
+                ShowAns.push("-----------")
+                ShowAns.push(addBinary(String(numbera), String(numberb)))
+                ShowAns.push("把以上的結果加上負號 ")
+                ShowAns.push("=-" + addBinary(String(numbera), String(numberb)))
+
+                document.getElementById('ANS').innerHTML = '';
+                for (i = 0; i < ShowAns.length; i++) {
+                    document.getElementById('ANS').innerHTML += ShowAns[i];
+                    document.getElementById('ANS').innerHTML += "<br>";
+                }
+
+                return;
+
+            } else if (addsub1 == '+' && addsub2 == '+') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+                ShowAns.push("<br>")
+                ShowAns.push("因為符號兩個數字都為正數 ")
+                ShowAns.push("直接相加")
+                ShowAns.push(numbera)
+                ShowAns.push("+" + numberb)
+                ShowAns.push("-----------")
+                ShowAns.push(addBinary(String(numbera), String(numberb)))
+                ShowAns.push("答案為" + addBinary(String(numbera), String(numberb)))
+
+                document.getElementById('ANS').innerHTML = '';
+                for (i = 0; i < ShowAns.length; i++) {
+                    document.getElementById('ANS').innerHTML += ShowAns[i];
+                    document.getElementById('ANS').innerHTML += "<br>";
+                }
+                return;
+            }
+
+            let Step00 = '0'
+            let Stepnumber = numbera;
+            let Stepnumbermorenumberb = numberb;
+            if (String(numbera).length < String(numberb).length) {
+                for (let i = 0; i < String(numberb).length - String(numbera).length; i++) {
+                    Stepnumber = String(Step00) + String(Stepnumber)
+                }
+            }
+
+            if (String(numbera).length > String(numberb).length) {
+                for (let i = 0; i < String(numbera).length - String(numberb).length; i++) {
+                    Stepnumbermorenumberb = String(Step00) + String(Stepnumbermorenumberb)
+                }
+            }
+            let Step0 = one_compliment(Stepnumbermorenumberb);
+            ShowAns.push("1)先取得N值的1補數, 把N值的0和1值全部相反再加上1 ")
+            ShowAns.push(numberb + "==>" + Step0)
+            ShowAns.push("<br>")
+
+            ShowAns.push(Stepnumber) // a
+            ShowAns.push("+" + Step0)
+            let Step1 = addBinary(String(Stepnumber), String(Step0));
+            let Step2 = '';
+            ShowAns.push("-------------------")
+            Step1_1 = String(Step1)
+            ShowAns.push(Step1_1)
+            numbera_1 = String(numbera)
+
+            if (Step1_1.length > Stepnumber.length) {
+                Step2 = Number(Step1_1.substring(1, Step1_1.length));
+                Step2 = addBinary(String(Step2), '1');
+                ShowAns.push(" 因為有溢位，使用端迴進位 --> " + Step2)
+            } else {
+                Step2 = '-' + one_compliment(Step1);
+                ShowAns.push("因為無溢位，所以再做1補數前方加上負號 --> Ans =  " + Step2)
+            }
+
+            document.getElementById('ANS').innerHTML = '';
+            for (let i = 0; i < ShowAns.length; i++) {
+                document.getElementById('ANS').innerHTML += ShowAns[i];
+                document.getElementById('ANS').innerHTML += '<br>';
+            }
+        }
+
+        function addBinary(a, b) { // a 和 b 的INPUT 都要字串
+
+            var res = [];
+            //是否進位
+            var addOne = 0;
+
+            //字串對齊
+            while (a.length < b.length) {
+                a = "0" + a;
+            }
+
+            while (b.length < a.length) {
+                b = "0" + b;
+            }
+            //從低位到高位，依次相加
+            for (var i = a.length - 1; i >= 0; i--) {
+                var curA = +a.charAt(i);
+                var curB = +b.charAt(i);
+                var sum = curA + curB + addOne;
+                //逢2進位
+                if (sum >= 2) {
+                    res[i] = sum - 2;
+                    addOne = 1;
+                } else {
+                    res[i] = sum;
+                    addOne = 0;
+                }
+            }
+
+            if (addOne > 0) {
+                res.unshift(1);
+            }
+            //一次性拼接
+            return res.join("");
+        };
+
+        function Two_compliment(number) {
+            let Step0 = [];
+            let Step1 = '';
+            for (let i = 0; i < number.length; i++) {
+                if (Number(number[i]) == 0) {
+                    Step0.push(1);
+                } else {
+                    Step0.push(0);
+                }
+            }
+            Step1 = Step0.join('');
+            Step2 = addBinary(String(Step1), '1')
+            return String(Step2);
+        }
+
+        function A_sub_B_Compliment_2bit(numbera, numberb, addsub1, addsub2) {
+            let ShowAns = [];
+            if (addsub1 == '+' && addsub2 == '-') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+
+                //沒有問題 GO
+            } else if (addsub1 == '-' && addsub2 == '+') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+                //A B 兩個值換一下
+                var save = numbera;
+                numbera = numberb;
+                numberb = save;
+                ShowAns.push("因為符號是負號和正號 ，所以先把原本的兩個數字進行無條件互換")
+                ShowAns.push("新的M 為" + numbera)
+                ShowAns.push("新的N 為" + numberb)
+                ShowAns.push("=============")
+
+            } else if (addsub1 == '-' && addsub2 == '-') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+                ShowAns.push("<br>")
+                ShowAns.push("因為符號兩個數字都為負數 ")
+                ShowAns.push("第一步把原本的兩個數字的負號去除掉，之後相加")
+                ShowAns.push(numbera)
+                ShowAns.push("+" + numberb)
+                ShowAns.push("-----------")
+                ShowAns.push(addBinary(String(numbera), String(numberb)))
+                ShowAns.push("把以上的結果加上負號 ")
+                ShowAns.push("=-" + addBinary(String(numbera), String(numberb)))
+
+                document.getElementById('ANS').innerHTML = '';
+                for (i = 0; i < ShowAns.length; i++) {
+                    document.getElementById('ANS').innerHTML += ShowAns[i];
+                    document.getElementById('ANS').innerHTML += "<br>";
+                }
+
+                return;
+
+            } else if (addsub1 == '+' && addsub2 == '+') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+                ShowAns.push("<br>")
+                ShowAns.push("因為符號兩個數字都為正數 ")
+                ShowAns.push("直接相加")
+                ShowAns.push(numbera)
+                ShowAns.push("+" + numberb)
+                ShowAns.push("-----------")
+                ShowAns.push(addBinary(String(numbera), String(numberb)))
+                ShowAns.push("答案為" + addBinary(String(numbera), String(numberb)))
+
+                document.getElementById('ANS').innerHTML = '';
+                for (i = 0; i < ShowAns.length; i++) {
+                    document.getElementById('ANS').innerHTML += ShowAns[i];
+                    document.getElementById('ANS').innerHTML += "<br>";
+                }
+                return;
+            }
+
+
+
+            let Step00 = '0'
+            let Stepnumber = numbera;
+            let Stepnumbermorenumberb = numberb;
+            if (String(numbera).length < String(numberb).length) {
+                for (let i = 0; i < String(numberb).length - String(numbera).length; i++) {
+                    Stepnumber = String(Step00) + String(Stepnumber)
+                }
+            }
+            if (String(numbera).length > String(numberb).length) {
+                for (let i = 0; i < String(numbera).length - String(numberb).length; i++) {
+                    Stepnumbermorenumberb = String(Step00) + String(Stepnumbermorenumberb)
+                }
+            }
+
+            let Step0 = Two_compliment(Stepnumbermorenumberb);
+            ShowAns.push("1)先取得N值的1補數, 把N值的0和1值全部相反再加上1 ")
+            ShowAns.push(numberb + "==>" + Step0)
+            ShowAns.push("<br>")
+
+            ShowAns.push("2)" + Stepnumber)
+            ShowAns.push("+" + Step0)
+            let Step1 = addBinary(String(Stepnumber), String(Step0));
+            let Step2 = '';
+            ShowAns.push("-------------------")
+            Step1_1 = String(Step1)
+            ShowAns.push(Step1_1)
+            numbera_1 = String(numbera)
+
+            if (Step1_1.length > Stepnumber.length) {
+                Step2 = Number(Step1_1.substring(1, Step1_1.length));
+                ShowAns.push(" 因為有溢位，去掉前面的位號 1 ")
+                ShowAns.push(" Ans :" + Step2)
+            } else {
+                Step2 = '-' + Two_compliment(Step1);
+                ShowAns.push("因為無溢位，所以再做2補數前方加上負號 ")
+                ShowAns.push(" Ans :" + Step2)
+            }
+
+            document.getElementById('ANS').innerHTML = '';
+            for (let i = 0; i < ShowAns.length; i++) {
+                document.getElementById('ANS').innerHTML += ShowAns[i];
+                document.getElementById('ANS').innerHTML += '<br>';
+            }
+        }
+
+        function A_sub_B_Compliment_10bit(numbera, numberb, addsub1, addsub2) {
+            function xcompliment(number) {
+                let b = '';
+                for (let i = 0; i < number.length; i++) {
+                    b = b + '9';
+                }
+                let Ans = Number(b) - Number(number) + 1;
+                return Ans;
+            }
+
+            function xcompliment2(originnnumber, needchangenumebr) {
+                let Ans = [];
+                let b = '';
+                let Step0 = ''
+
+                if (String(originnnumber).length > String(needchangenumebr).length) {
+                    Step0 = originnnumber;
+                    console.log(Step0);
+                } else {
+                    Step0 = needchangenumebr;
+                    console.log(Step0);
+                }
+                for (let i = 0; i < Step0.length; i++) {
+                    b = b + '9';
+                }
+                Ans.push(Number(b) - Number(needchangenumebr) + 1);
+                Ans.push(b)
+                return Ans;
+            }
+            let ShowAns = [];
+
+            if (addsub1 == '+' && addsub2 == '-') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+                //沒有問題 GO
+            } else if (addsub1 == '-' && addsub2 == '+') {
+                //A B 兩個值換一下
+                var save = numbera;
+                numbera = numberb;
+                numberb = save;
+                ShowAns.push("因為符號是負號和正號 ，所以先把原本的兩個數字進行無條件互換")
+                ShowAns.push("新的M 為" + numbera)
+                ShowAns.push("新的N 為" + numberb)
+                ShowAns.push("=============")
+
+            } else if (addsub1 == '-' && addsub2 == '-') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+                ShowAns.push("<br>")
+                ShowAns.push("因為符號兩個數字都為負數 ")
+                ShowAns.push("第一步把原本的兩個數字的負號去除掉，之後相加")
+                ShowAns.push(numbera)
+                ShowAns.push("+" + numberb)
+                ShowAns.push("-----------")
+                ShowAns.push(Number(numbera) + Number(numberb))
+                ShowAns.push("把以上的結果加上負號 ")
+                ShowAns.push("=-" + `${Number(numbera) + Number(numberb)}`)
+
+                document.getElementById('ANS').innerHTML = '';
+                for (i = 0; i < ShowAns.length; i++) {
+                    document.getElementById('ANS').innerHTML += ShowAns[i];
+                    document.getElementById('ANS').innerHTML += "<br>";
+                }
+
+                return;
+
+            } else if (addsub1 == '+' && addsub2 == '+') {
+                ShowAns.push("計算" + addsub1 + numbera + addsub2 + numberb)
+                ShowAns.push("<br>")
+                ShowAns.push("因為符號兩個數字都為正數 ")
+                ShowAns.push("直接相加")
+                ShowAns.push(numbera)
+                ShowAns.push("+" + numberb)
+                ShowAns.push("-----------")
+                ShowAns.push(Number(numbera) + Number(numberb))
+                ShowAns.push("答案為" + `${Number(numbera) + Number(numberb)}`)
+
+                document.getElementById('ANS').innerHTML = '';
+                for (i = 0; i < ShowAns.length; i++) {
+                    document.getElementById('ANS').innerHTML += ShowAns[i];
+                    document.getElementById('ANS').innerHTML += "<br>";
+                }
+                return;
+            }
+
+
+            let Step00 = '0'
+
+            let Stepnumber = numbera;
+            if (String(numbera).length < String(numberb).length) {
+                for (let i = 0; i < String(numberb).length - String(numbera).length; i++) {
+                    Stepnumber = String(Step00) + String(Stepnumber)
+                }
+            }
+            //  console.log(numbera,numberb)
+            let Step0 = xcompliment2(numbera, numberb)
+            ShowAns.push("取得N 的10補數")
+            ShowAns.push("1)" + Step0[1])
+            ShowAns.push("-" + numberb)
+            ShowAns.push("+ 1 ")
+            ShowAns.push("---------")
+            ShowAns.push(Step0[0])
+            ShowAns.push("<br>")
+            let Step1 = Number(numbera) + Number(Step0[0]);
+            let Step2 = '';
+            ShowAns.push("2)" + Stepnumber); //A
+            ShowAns.push("+" + Step0[0]); //B
+            ShowAns.push("-------------"); //分割線
+
+            Step1_1 = String(Step1)
+            numbera_1 = String(numbera)
+            ShowAns.push(Step1); //A+B
+
+            if (Step1_1.length > Stepnumber.length) {
+                Step2 = Number(Step1_1.substring(1, Step0[0].length));
+                ShowAns.push("因為有溢位，去掉前面的位數--> 所以答案是: " + Step2);
+            } else {
+                Step2 = '-' + Number(xcompliment(String(Step1)));
+                ShowAns.push("因為沒有溢位，因此要去再做一次補數，加上負號--> 所以答案是: " + Step2);
+            }
+            console.log(Step2);
+
+            document.getElementById('ANS').innerHTML = '';
+            for (i = 0; i < ShowAns.length; i++) {
+                document.getElementById('ANS').innerHTML += ShowAns[i];
+                document.getElementById('ANS').innerHTML += "<br>";
+            }
+        }
+
+        function asciicode() {
+            // str="A";     //
+            //code = str.charCodeAt();   //ASCII CODE 變10進位數字
+            str2 = String.fromCharCode(37); //10 進位數變ascii CODE
+            console.log(str2); //  37==>2進制==>00100101 ==> ascii 表0101(左) 0010(上) = %  
+        }
+
+        function keyin() {
+            let originNumber = document.getElementById("originNumber").value;
+            let originBase = document.getElementById("originBase").value;
+            if (originBase == '2') {
+                for (let i = 0; i < originNumber.length; i++) {
+                    if (originNumber[i] >= 3) {
+                        alert('輸入錯誤 2 進制只能1和 0 ')
+                        return
+                    }
+                }
+            }
+
+            if (isNaN(Number(originBase)) == true) {
+                alert("進制格式不能包含字母");
+                return
+            }
+
+            let Changebase = document.getElementById("Changebasec").value;
+
+            if (isNaN(Number(Changebase)) == true) {
+                alert("進制格式不能包含字母");
+                return
+            }
+            AnytoAnyBitSystem(originNumber, originBase, Changebase);
+        }
+
+        function AnytoAnyBitSystem(originNumber, originBase, Changebase) {
+            let nnn;
+
+            function anyto10(digits, base) {
+                let Ans = 0;
+                let Ans2 = 0;
+                let splitdiDecimal = digits.split('.');
+                showAnsStep = [];
+                showAnsStep2 = [];
+                nodigits = splitdiDecimal[0];
+                havedigits = splitdiDecimal[1];
+
+                Rnodigits = reversestring(nodigits)
+                for (let i = nodigits.length - 1; i >= 0; --i) {
+                    //  Rnodigits[i] = parseInt(Rnodigits[i], 16);
+                    let basetotened = parseInt(Rnodigits[i], base);
+
+                    if (isNaN(basetotened) == true) {
+                        alert("請檢查輸入的數字進制格式是否正常");
+                    }
+                    Ans += Number(basetotened) * Number(Math.pow(base, i));
+
+                    showAnsStep.push(Number(basetotened));
+                    showAnsStep.push('*');
+                    showAnsStep.push(base);
+                    showAnsStep.push('^');
+                    showAnsStep.push(i);
+                    if (i !== 0) {
+                        showAnsStep.push(' ');
+                        showAnsStep.push('+');
+                        showAnsStep.push(' ');
+                    }
+
+                    showAnsStep2.push(Number(basetotened) * Number(Math.pow(base, i)));
+                    if (i !== 0) {
+                        showAnsStep2.push('+');
+                    }
+                }
+
+                if (havedigits != undefined) {
+                    for (let i = 0; i < havedigits.length; i++) {
+                        let havedigitsbasetotened = parseInt(havedigits[i], base)
+                        if (isNaN(havedigitsbasetotened) == true) {
+                            alert("請檢查輸入的數字進制格式是否正常");
+                        }
+                        Ans2 += Number(havedigitsbasetotened) * Number(Math.pow(base, (i + 1) * -1));
+                        showAnsStep.push(' ');
+                        showAnsStep.push('+');
+                        showAnsStep.push(' ');
+                        showAnsStep.push(Number(havedigitsbasetotened));
+                        showAnsStep.push('*');
+                        showAnsStep.push(base);
+                        showAnsStep.push('^');
+                        showAnsStep.push('-');
+                        showAnsStep.push(i + 1);
+                        showAnsStep2.push('+');
+                        showAnsStep2.push(Number(havedigitsbasetotened) * Number(Math.pow(base, (i + 1) * -1)));
+                    }
+                }
+                document.getElementById('ANS').innerHTML += '=' + showAnsStep.join('');
+                document.getElementById('ANS').innerHTML += '<br>';
+                document.getElementById('ANS').innerHTML += '=' + showAnsStep2.join('');
+                document.getElementById('ANS').innerHTML += '<br>';
+                document.getElementById('ANS').innerHTML += '=' + Ans + '+' + Ans2;
+                document.getElementById('ANS').innerHTML += '<br>';
+                document.getElementById('ANS').innerHTML += '=' + (Number(Ans) + Number(Ans2));
+                document.getElementById('ANS').innerHTML += '<br>';
+                document.getElementById('ANS').innerHTML += '<br>';
+
+                nnn = Number(Ans) + Number(Ans2)
+                return nnn;
+            }
+
+            function TenToAny(digits, tobase) {
+
+                if (digits.indexOf('.') > -1) {
+                    digits = digits.split('.');
+                    var usedigits = digits[0];
+                    var havedigits = digits[1];
+                } else {
+                    var havedigits = 'nodigits';
+                    var usedigits = digits;
+                }
+
+                let Catchhavedigits = havedigits;
+                let TenToAnyStepCache = [];
+                let TenToAnyStep = [];
+                let Ans = [];
+                let AnsDigits = [];
+                let AnsDigitsShowstep = [];
+
+                if (usedigits != '0') {
+                    for (let i = 0; i < 50; i++) {
+                        TenToAnyStepCache = [];
+                        let Cache = usedigits % tobase
+                        let Cachestep = Cache
+                        Cache = Cache.toString(tobase);
+                        Ans.push(Cache);
+                        TenToAnyStepCache.push(usedigits + '/' + tobase)
+                        usedigits = parseInt(usedigits / tobase);
+                        TenToAnyStepCache.push("=" + usedigits + "..." + Cachestep + "-->" + Cache)
+                        TenToAnyStep.push(TenToAnyStepCache.join(''));
+                        if (usedigits == '0') {
+                            break;
+                        }
+                    }
+                    for (let i = 0; i < TenToAnyStep.length; i++) {
+                        document.getElementById('ANS').innerHTML += '=' + TenToAnyStep[i];
+                        document.getElementById('ANS').innerHTML += '<br>';
+                    }
+                    document.getElementById('ANS').innerHTML += '=' + reversestring(Ans.join(''));
+                    document.getElementById('ANS').innerHTML += '<br>';
+                    document.getElementById('ANS').innerHTML += '<br>';
+                }
+
+
+                if (havedigits != 'nodigits') {
+                    Catchhavedigits = '0.' + Catchhavedigits;
+                    for (let i = 0; i < 10; i++) {
+
+                        let a = Catchhavedigits * tobase;
+                        AnsDigitsShowstep.push(Catchhavedigits + '*' + tobase + '=' + a);
+                        let = Catchhavedigitspoint = [];
+                        a = String(a);
+                        Catchhavedigitspoint = a.split('.');
+                        Catchhavedigits = '0.' + Catchhavedigitspoint[1];
+
+                        let Cache = Number(Catchhavedigitspoint[0]).toString(tobase);
+                        AnsDigits.push(Cache);
+
+                        if (Catchhavedigitspoint[1] == undefined) {
+                            break;
+                        }
+                    }
+
+
+                    for (let i = 0; i < AnsDigitsShowstep.length; i++) {
+                        document.getElementById('ANS').innerHTML += '=' + AnsDigitsShowstep[i];
+                        document.getElementById('ANS').innerHTML += '<br>';
+                    }
+                    document.getElementById('ANS').innerHTML += '0.' + AnsDigits.join('');
+                    document.getElementById('ANS').innerHTML += '<br>';
+                    document.getElementById('ANS').innerHTML += '<br>';
+                    document.getElementById('ANS').innerHTML += '最後答案' + (reversestring(Ans.join('')) + '.' + AnsDigits
+                        .join(''));
+
+                }
+                if (havedigits == 'nodigits') {
+                    nnn = reversestring(Ans.join(''));
+                } else {
+                    nnn = reversestring(Ans.join('')) + '.' + AnsDigits.join('');
+                }
+                return nnn;
+            }
+
+
+
+            function isNaN(x) {
+                return x !== x;
+            };
+            document.getElementById('ANS').innerHTML = '';
+
+            if (originBase != Changebase) {
+                if (originBase == '10' || originBase == 10) {
+                    TenToAny(originNumber, Changebase);
+                }
+
+                if (Changebase == '10' || Changebase == 10) {
+                    anyto10(originNumber, originBase)
+                }
+
+                if (originBase != '10' && Changebase != '10') {
+                    TenToAny(String(anyto10(originNumber, originBase)), Changebase);
+                }
+            } else {
+                alert("進制本身相同，不用轉換");
+            }
+
+            return nnn;
+        }
+
+        function reversestring(str) {
+            return str.split('').reverse().join('');
+        }
+
+        function andor() {
+            let Step0 = document.getElementById('andorinput1').value;
+            let Step1 = document.getElementById('andorinput2').value;
+            let Step3 = document.getElementById('andor').value;
+
+            if (Step3 == 'and') {
+                XAndY(Step0, Step1);
+            } else if (Step3 == 'or') {
+                XORY(Step0, Step1);
+            }
+        }
+
+        function paritybit() {
+            let number = document.getElementById('paritybiteveninput').value
+            let evenodd = document.getElementById('paritybiteven').value
+            let Step0 = '';
+
+            for (let i = 0; i < String(number).length; i++) {
+                if (number[i] == 1) {
+                    Step0 += 1
+                }
+            }
+            console.log("asdas")
+            if (evenodd == 'even') {
+                if (Step0 % 2 == 0) {
+                    number = '0' + number;
+                } else {
+                    number = '1' + number;
+                }
+            } else {
+                if (Step0 % 2 == 0) {
+                    number = '1' + number;
+                } else {
+                    number = '0' + number;
+                }
+            }
+            console.log(number);
+            return number;
+
+        }
+
+        function XAndY(x, y) {
+            let Step0 = [];
+            if (String(x).length < String(y).length) {
+                x = x.padStart(String(y).length, '0')
+            } else {
+                y = y.padStart(String(x).length, '0')
+            }
+
+            for (let i = 0; i < String(x).length; i++) {
+                Step0.push(x[i] * y[i])
+            }
+
+            Step0 = Step0.join('');
+            console.log(Step0);
+        }
+
+        function XORY(x, y) { //加法
+            let Step0 = [];
+            if (String(x).length < String(y).length) {
+                x = x.padStart(String(y).length, '0')
+            } else {
+                y = y.padStart(String(x).length, '0')
+            }
+
+            for (let i = 0; i < String(x).length; i++) {
+                if (x[i] == 1 && y[i] == 1) {
+                    Step0.push('1');
+                } else {
+                    Step0.push(Number(x[i]) + Number(y[i]))
+                }
+            }
+
+            Step0 = Step0.join('');
+            console.log(Step0);
+        }
+
+        function changejs() {
+            //(x+y)+((x+y(x+yy)')')'
+            let number = "(((o'p'r's+o(o+p)')')')'";
+            let numbermul = [];
+            console.log(number);
+            let Step0 = '';
+            let Cnumber = [];
+            let CnumberStep1 = '';
+            let brackets = [];
+            let bracketsLevel = -1 ;
+            if (number.indexOf('-') > -1) {
+                alert('輸入格式錯誤');
+                return;
+            }
+
+            if (number.indexOf('*') > -1) {
+                if (confirm("請不要輸入'*'，是否要進行自動去除'*' 號")) {
+                    numbermul = number.split("*");
+                    number = numbermul.join('');
+                }
+            }
+
+            for (let i = 0; i < number.length; i++) {
+                if (number[i] == '(') {
+                    brackets.push(Cnumber.length);
+                    bracketsLevel += 1 ;
+                }
+
+                if(number[i] == ')' && number[i+1] !== "'"){
+                    brackets.splice(bracketsLevel, 1)
+                    bracketsLevel = bracketsLevel - 1 ;
+                }
+
+                if (number[i] == "'") {
+                    if (number[i - 1] == ')') {
+                        if(Cnumber[brackets[bracketsLevel]] == '+'){
+                          Cnumber.splice(brackets[bracketsLevel] + 1, 0, '~')
+                        }else{
+                          Cnumber.splice(brackets[bracketsLevel], 0, '~')
+                        }
+                        brackets.splice(bracketsLevel, 1)
+                        bracketsLevel = bracketsLevel - 1 ;
+                    } else {
+                        Cnumber.pop();
+                        Cnumber.push('~');
+                        Cnumber.push(number[i - 1]);
+                    }
+                    if (number[i + 1] == '(' || number[i + 1] !== '+') {
+                        if (number[i + 1] !== ')') {
+                            if (i !== number.length - 1) {
+                                if (Cnumber[Cnumber.length - 1] !== '*') {
+                                    Cnumber.push('*');
+                                }
+                            }
+                        }
+                    }
+
+                } else if (number[i] == ')' && number[i + 1] == '(') {
+                    Cnumber.push(number[i]);
+                    if (Cnumber[Cnumber.length - 1] !== '*') {
+                        Cnumber.push('*');
+                    }
+
+                } else if (number[i] == ')' && number[i + 1] == "'" && number[i + 2] == '(') {
+                    Cnumber.push(number[i]);
+                    if (Cnumber[Cnumber.length - 1] !== '*') {
+                        Cnumber.push('*');
+                    }
+
+                } else if (number[i] !== '+' && number[i + 1] !== '+') {
+                    if (number[i + 1] !== "'" && number[i] !== '(' && number[i + 1] !== ')') {
+                        Cnumber.push(number[i]);
+                        if (i !== number.length - 1) {
+                            if (Cnumber[Cnumber.length - 1] !== '*') {
+                                Cnumber.push('*');
+                            }
+
+                        }
+                    } else {
+                        Cnumber.push(number[i]);
+                    }
+                } else {
+                    Cnumber.push(number[i]);
+                }
+            }
+            CnumberStep1 = Cnumber.join('');
+            console.log(CnumberStep1);
+            // document.getElementById("expr").value = CnumberStep1;.
+            return CnumberStep1;
+            //https://greasyfork.org/en/scripts/423255-boolean-formatter/code
+        }
+    </script>
+</body>
+
+</html>
