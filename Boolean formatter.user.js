@@ -35,6 +35,7 @@
 
    function changejs(text) {
             let number = text;
+       number = number.toLowerCase()
         let numbermul = [];
             console.log(number);
             let Step0 = '';
